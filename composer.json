@@ -1,0 +1,32 @@
+{
+    "name": "laravel-code/event-sourcing",
+    "description": "Event sourcing for laravel",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Raymond van Vuuren",
+            "email": "rsvvuuren@hotmail.com"
+        }
+    ],
+    "require": {
+        "php": "^7.4"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^2.16"
+    },
+    "autoload": {
+        "psr-4": {
+            "LaravelCode\\EventSourcing\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "fix": [
+            "php-cs-fixer fix"
+        ]
+    }
+}
