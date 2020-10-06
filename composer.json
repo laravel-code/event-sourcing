@@ -24,6 +24,13 @@
             "Tests\\": "tests/"
         }
     },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "LaravelCode\\EventSourcing\\ServiceProvider"
+            ]
+        }
+    },
     "scripts": {
         "fix": [
             "php-cs-fixer fix"
