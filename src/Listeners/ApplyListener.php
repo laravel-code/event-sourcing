@@ -3,7 +3,7 @@
 namespace LaravelCode\EventSourcing\Listeners;
 
 use Illuminate\Database\Eloquent\Model;
-use LaravelCode\EventSourcing\Contracts\EventInterface;
+use LaravelCode\EventSourcing\Contracts\ApplyEventInterface;
 use LaravelCode\EventSourcing\Contracts\EventInterface;
 use LaravelCode\EventSourcing\Exceptions\ModelNotFoundException;
 use LaravelCode\EventSourcing\Models\Command;
@@ -26,7 +26,7 @@ trait ApplyListener
 
     private bool $isDeleted = false;
 
-    public function __invoke(EventInterface $event)
+    public function __invoke(ApplyEventInterface $event)
     {
         try {
             $this->loadEntity($event);
