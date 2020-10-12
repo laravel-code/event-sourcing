@@ -1,6 +1,6 @@
 <?php
 
-namespace LaravelCode\EventSourcing\EventSourcing;
+namespace LaravelCode\EventSourcing\Event\Apply;
 
 use Illuminate\Support\Collection;
 use LaravelCode\EventSourcing\Contracts\EventInterface;
