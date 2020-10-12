@@ -2,6 +2,8 @@
 
 namespace LaravelCode\EventSourcing;
 
+use App\Console\Commands\ESEvent;
+use App\Console\Commands\ESListener;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Validator;
 use LaravelCode\Crud\Commands\CrudControllers;
@@ -15,6 +17,11 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->loadMigrationsFrom(__DIR__.'/database/migrations');
+
+            $this->commands([
+                ESEvent::class,
+                ESListener::class,
+            ]);
         }
     }
 

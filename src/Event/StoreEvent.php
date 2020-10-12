@@ -7,7 +7,7 @@ use Illuminate\Support\Collection;
 use LaravelCode\EventSourcing\Models\Command;
 use Str;
 
-trait StoreCommandEvent
+trait StoreEvent
 {
     /**
      * @var string|int|null
@@ -67,7 +67,7 @@ trait StoreCommandEvent
     {
         $commandId = Str::uuid();
 
-        /** @var StoreCommandEvent $class */
+        /** @var StoreEvent $class */
         $class = call_user_func([get_called_class(), 'fromPayload'], $id, new Collection($params));
         $class->setCommandId($commandId);
         $class->setAuthorId(Auth::id());

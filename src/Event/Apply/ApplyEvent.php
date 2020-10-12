@@ -6,7 +6,7 @@ use Illuminate\Support\Collection;
 use LaravelCode\EventSourcing\Contracts\EventInterface;
 use Str;
 
-abstract class Event implements EventInterface
+abstract class ApplyEvent implements EventInterface
 {
     protected ?string $id;
     protected string $commandId;

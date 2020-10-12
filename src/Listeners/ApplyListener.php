@@ -3,7 +3,7 @@
 namespace LaravelCode\EventSourcing\Listeners;
 
 use Illuminate\Database\Eloquent\Model;
-use LaravelCode\EventSourcing\Contracts\CommandEventInterface;
+use LaravelCode\EventSourcing\Contracts\EventInterface;
 use LaravelCode\EventSourcing\Contracts\EventInterface;
 use LaravelCode\EventSourcing\Exceptions\ModelNotFoundException;
 use LaravelCode\EventSourcing\Models\Command;
@@ -22,7 +22,7 @@ trait ApplyListener
 
     private int $revisionNumber = 0;
 
-    private CommandEventInterface $command;
+    private EventInterface $command;
 
     private bool $isDeleted = false;
 
@@ -143,7 +143,7 @@ trait ApplyListener
         return $closure;
     }
 
-    public function handle(CommandEventInterface $event)
+    public function handle(EventInterface $event)
     {
         try {
             $commandClass = $this->getCommandName(get_called_class());

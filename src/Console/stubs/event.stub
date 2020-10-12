@@ -1,0 +1,48 @@
+<?php
+
+namespace DummyNamespace;
+
+use Illuminate\Broadcasting\Channel;
+use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PresenceChannel;
+use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
+use LaravelCode\EventSourcing\Contracts\CommandEventInterface;
+use LaravelCode\EventSourcing\EventSourcing\Event;
+
+class DummyClass
+{
+    use Dispatchable, InteractsWithSockets, SerializesModels, StoreEvent;
+
+    private string $name;
+
+    public function __construct($name)
+    {
+        $this->name = $name;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+
+    public static function fromPayload($id, Collection $collection)
+    {
+        return new self(
+            $collection->get('name')
+        );
+    }
+
+    public function toPayload(): array
+    {
+        return [
+            'name' => $this->getName()
+        ];
+    }
+}

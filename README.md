@@ -336,10 +336,10 @@ class PostCreateListener extends BasePostListener implements ShouldQueue
 namespace App\Models\Events\Post;
 
 use LaravelCode\EventSourcing\Contracts\EventInterface;
-use LaravelCode\EventSourcing\EventSourcing\Event;
+use LaravelCode\EventSourcing\EventSourcing\ApplyEvent;
 use Illuminate\Support\Collection;
 
-class PostWasCreated extends Event implements EventInterface
+class PostWasCreated extends ApplyEvent implements EventInterface
 {
     private string $name;
 
