@@ -5,7 +5,7 @@ namespace DummyNamespace;
 use DummyFullEvent;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
-use LaravelCode\EventSourcing\Contracts\CommandEventInterface;
+use LaravelCode\EventSourcing\Contracts\EventInterface;
 use LaravelCode\EventSourcing\Listeners\ApplyListener;
 
 class DummyClass
@@ -18,7 +18,7 @@ class DummyClass
      * @param  DummyEvent  $event
      * @return void
      */
-    public function handleCommand(CommandEventInterface $event)
+    public function handleCommand(EventInterface $event)
     {
         // event(new WasCreated(null, $event->getName()));
     }
