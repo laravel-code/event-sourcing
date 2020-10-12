@@ -9,10 +9,10 @@ use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use LaravelCode\EventSourcing\Contracts\CommandEventInterface;
-use LaravelCode\EventSourcing\EventSourcing\Event;
+use LaravelCode\EventSourcing\Contracts\EventInterface;
+use LaravelCode\EventSourcing\EventSourcing\StoreEvent;
 
-class DummyClass
+class DummyClass implements EventInterface
 {
     use Dispatchable, InteractsWithSockets, SerializesModels, StoreEvent;
 
