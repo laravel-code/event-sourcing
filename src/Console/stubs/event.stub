@@ -19,8 +19,9 @@ class DummyClass implements EventInterface
 
     private string $name;
 
-    public function __construct($name)
+    public function __construct($id, $name)
     {
+        parent::__construct($id);
         $this->name = $name;
     }
 
@@ -36,6 +37,7 @@ class DummyClass implements EventInterface
     public static function fromPayload($id, Collection $collection)
     {
         return new self(
+            $id,
             $collection->get('name')
         );
     }
@@ -43,7 +45,8 @@ class DummyClass implements EventInterface
     public function toPayload(): array
     {
         return [
-            'name' => $this->getName()
+            'id'   => $this->getId(),
+            'name' => $this->getName(),
         ];
     }
 }
