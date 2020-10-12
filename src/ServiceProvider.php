@@ -2,14 +2,11 @@
 
 namespace LaravelCode\EventSourcing;
 
-use App\Console\Commands\ESEvent;
-use App\Console\Commands\ESListener;
+
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Validator;
-use LaravelCode\Crud\Commands\CrudControllers;
-use LaravelCode\Crud\Commands\CrudEvents;
-use LaravelCode\Crud\Commands\CrudGenerate;
-use LaravelCode\Crud\Commands\CrudRoutes;
+use LaravelCode\EventSourcing\Console\ESEvent;
+use LaravelCode\EventSourcing\Console\ESListener;
 
 class ServiceProvider extends \Illuminate\Support\ServiceProvider
 {
