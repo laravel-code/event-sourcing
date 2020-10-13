@@ -10,12 +10,12 @@ use LaravelCode\EventSourcing\Listeners\ApplyListener;
 
 class DummyClass
 {
-     use ApplyListener;
+    use ApplyListener;
 
-     /**
-     * Set if the program is unable to guess the model class
-     */
-     // public $model = 'CHANGEME'
+    /**
+    * Set if the program is unable to guess the model class
+    */
+    // public $model = 'CHANGEME'
 
     /**
      * Handle the event.
