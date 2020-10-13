@@ -26,6 +26,8 @@ trait ApplyListener
 
     private bool $isDeleted = false;
 
+    private string $_model;
+
     public function __invoke(ApplyEventInterface $event)
     {
         try {
@@ -53,7 +55,7 @@ trait ApplyListener
         (new Event([
             'id' => $event->getEventId(),
             'command_id' => $event->getCommandId(),
-            'model' => $this->model,
+            'model' => $this->getModel(),
             'resource_id' => $this->entity->id,
             'payload' => json_encode($event->toPayload()),
             'revision_number' => $this->revisionNumber,
@@ -67,8 +69,9 @@ trait ApplyListener
     {
         if ($event->getId()) {
             /** @var Model $model */
-            $model = (new $this->model);
-            $this->entity = $model->find($event->getId());
+            $modelClass = $this->getModel();
+            $modelInstance = (new $modelClass);
+            $this->entity = $modelInstance->find($event->getId());
             if (! $this->entity) {
                 throw new ModelNotFoundException();
             }
@@ -77,7 +80,8 @@ trait ApplyListener
 
             return;
         }
-        $this->entity = (new $this->model);
+        $modelClass = $this->getModel();
+        $this->entity = (new $modelClass);
         $this->entity->revision_number = 1;
         $this->revisionNumber = 1;
     }
@@ -88,7 +92,7 @@ trait ApplyListener
             return;
         }
 
-        $revisionNumber = Event::where('model', $this->model)
+        $revisionNumber = Event::where('model', $this->getModel())
             ->where('resource_id', $this->entity->id)
             ->max('revision_number');
         $this->revisionNumber = $revisionNumber + 1;
@@ -146,19 +150,18 @@ trait ApplyListener
     public function handle(EventInterface $event)
     {
         try {
-            $commandClass = $this->getCommandName(get_called_class());
+            $commandClass = $this->getEventName(get_called_class());
             $class = $this->getClassName(get_class($event));
 
             if ($class !== $commandClass) {
                 return false;
             }
-
             $this->command = $event;
             $this->loadEntity($event);
             $this->handleCommand($event);
             $this->updateCommand($event->getCommandId(), Command::STATUS_HANDLED);
         } catch (\Exception $exception) {
-            $this->logException($event->getCommandId(), $exception->getMessage());
+            $this->logException($event->getCommandId(), $exception->getMessage().$exception->getTraceAsString());
         }
     }
 
@@ -192,9 +195,13 @@ trait ApplyListener
         event($event);
     }
 
-    private function getCommandName(string $class): string
+    private function getEventName(string $class): string
     {
-        return $this->getClassName(substr($class, 0, -8));
+        if (preg_match('/^(.*)Listener$/', $class, $matches)) {
+            return $this->getClassName($matches[1]);
+        }
+
+        return $this->getClassName($class);
     }
 
     private function getClassName(string $class): string
@@ -202,6 +209,32 @@ trait ApplyListener
         $list = explode('\\', $class);
 
         return end($list);
+    }
+
+    private function getModel()
+    {
+        if (isset($this->model)) {
+            return $this->model;
+        }
+
+        if (! empty($this->_model)) {
+            return $this->_model;
+        }
+
+        $calledClass = get_called_class();
+        $class = str_replace('\\Listeners\\', '\\Models\\', $calledClass);
+
+        $list = explode('\\', $class);
+        array_pop($list);
+
+        $modelClass = implode('\\', $list);
+        if (class_exists($modelClass)) {
+            $this->_model = $modelClass;
+
+            return $this->_model;
+        }
+
+        throw new \Exception('Please set the public property $model in the listener');
     }
 
     public function delete()

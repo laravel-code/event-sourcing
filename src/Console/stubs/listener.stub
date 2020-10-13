@@ -12,6 +12,11 @@ class DummyClass
 {
      use ApplyListener;
 
+     /**
+     * Set if the program is unable to guess the model class
+     */
+     // public $model = 'CHANGEME'
+
     /**
      * Handle the event.
      *
@@ -20,7 +25,7 @@ class DummyClass
      */
     public function handleCommand(EventInterface $event)
     {
-        // event(new WasCreated(null, $event->getName()));
+        // $this->event(new WasCreated(null, $event->getName()));
     }
 
     /**

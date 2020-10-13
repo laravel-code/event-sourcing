@@ -14,7 +14,7 @@ trait SearchBehaviourTrait
      * @param Request $request
      * @param $withQuery
      */
-    public function scopePaginatedResources(Builder $query, Request $request, $withQuery): LengthAwarePaginator
+    public function scopePaginatedResources(Builder $query, Request $request, $withQuery = null): LengthAwarePaginator
     {
         $this->runIncludes($query, $request->get('include', null));
         $this->runSearch($query, $request->all());
@@ -28,8 +28,11 @@ trait SearchBehaviourTrait
         if ($perPage > 100) {
             $perPage = $this->getPerPage();
         }
+        if ($withQuery) {
+            return $query->tap($withQuery)->paginate($perPage);
+        }
 
-        return $query->tap($withQuery)->paginate($perPage);
+        return $query->paginate($perPage);
     }
 
     /**

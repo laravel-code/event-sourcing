@@ -2,9 +2,6 @@
 
 namespace LaravelCode\EventSourcing;
 
-
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Validator;
 use LaravelCode\EventSourcing\Console\ESEvent;
 use LaravelCode\EventSourcing\Console\ESListener;
 
