@@ -396,7 +396,7 @@ Create a new EventListener.
 
 Replay events re-filling/updating the database.
 
-```php artisan events:replay```
+```php artisan event:replay```
 
         
 

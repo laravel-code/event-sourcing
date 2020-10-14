@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use LaravelCode\EventSourcing\Contracts\ApplyEventInterface;
 use LaravelCode\EventSourcing\Models\Event;
 
-class EventsReplay extends Command
+class EventReplay extends Command
 {
     private int $count = 0;
 
@@ -16,7 +16,7 @@ class EventsReplay extends Command
      *
      * @var string
      */
-    protected $signature = 'events:replay
+    protected $signature = 'event:replay
      {--model= : Replay commands from Model}
      {--resource-id= : Replay commands from Model with an ID}
      {--command-id= : Replay a commandId}

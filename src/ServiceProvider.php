@@ -4,6 +4,7 @@ namespace LaravelCode\EventSourcing;
 
 use LaravelCode\EventSourcing\Console\ESEvent;
 use LaravelCode\EventSourcing\Console\ESListener;
+use LaravelCode\EventSourcing\Console\EventReplay;
 
 class ServiceProvider extends \Illuminate\Support\ServiceProvider
 {
@@ -15,6 +16,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
             $this->commands([
                 ESEvent::class,
                 ESListener::class,
+                EventReplay::class,
             ]);
         }
     }
