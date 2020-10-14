@@ -78,6 +78,8 @@ class EventReplay extends Command
                             $replayEvent->setCommandId($event->command_id);
                             $replayEvent->setAuthorId($event->author_id);
                             $replayEvent->setRevisionNumber($event->revision_number);
+                            $replayEvent->setCreatedAt($event->created_at);
+                            $replayEvent->setUpdatedAt($event->updated_at);
                             event($replayEvent);
                         }
                     } catch (\Exception $exception) {

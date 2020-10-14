@@ -101,10 +101,15 @@ trait ApplyListener
                     return;
                 }
 
+                /** @var Model $entity */
                 $entity = $this->entity->findOrNew($event->getId());
                 $this->entity = $entity;
                 $this->entity->id = $event->getId();
                 $this->entity->revision_number = $event->getRevisionNumber();
+                if (empty($this->entity->created_at)) {
+                    $this->entity->created_at = $event->getCreatedAt();
+                }
+                $this->entity->updated_at = $event->getUpdatedAt();
             }
         }
     }

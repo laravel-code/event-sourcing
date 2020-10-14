@@ -12,7 +12,9 @@ abstract class ApplyEvent implements ApplyEventInterface
     protected string $commandId;
     protected string $eventId;
     protected $authorId;
-    protected $storeEvent = true;
+    protected bool $storeEvent = true;
+    protected string $createdAt;
+    protected string $updatedAt;
     protected int $revisionNumber;
 
     public function __construct(string $id = null)
@@ -109,5 +111,37 @@ abstract class ApplyEvent implements ApplyEventInterface
     public function setRevisionNumber(int $revisionNumber): void
     {
         $this->revisionNumber = $revisionNumber;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCreatedAt(): string
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * @param string $createdAt
+     */
+    public function setCreatedAt(string $createdAt): void
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUpdatedAt(): string
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * @param string $updatedAt
+     */
+    public function setUpdatedAt(string $updatedAt): void
+    {
+        $this->updatedAt = $updatedAt;
     }
 }
