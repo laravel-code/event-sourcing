@@ -377,6 +377,27 @@ class PostWasCreated extends ApplyEvent implements EventInterface
 ```
 
 
+## Commands
+
+There are 3 commands to make your live a little easier. 
+
+
+Create a new event which can be called from controller
+
+```php artisan make:es:event {EventClass}```
+
+Create a new event which can be called from the EventListener to apply the changes.
+
+```php artisan make:es:event --apply {EventClass}```
+
+Create a new EventListener. 
+
+```php artisan make:es:listener {EventListener}```
+
+Replay events re-filling/updating the database.
+
+```php artisan events:replay```
+
         
 
 

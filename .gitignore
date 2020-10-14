@@ -2,3 +2,4 @@
 .env
 .env.backup
 .idea
+.php_cs.cache
