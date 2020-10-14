@@ -56,7 +56,7 @@ trait SearchBehaviourTrait
      */
     private function parseInclude($includes)
     {
-        if (! $includes && ! isset($this->includes)) {
+        if (! $includes) {
             return;
         }
 
