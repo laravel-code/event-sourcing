@@ -3,7 +3,9 @@
 namespace LaravelCode\EventSourcing\Listeners;
 
 use Illuminate\Database\Eloquent\Model;
+use LaravelCode\AMPQ\ConnectionInterface;
 use LaravelCode\EventSourcing\Contracts\ApplyEventInterface;
+use LaravelCode\EventSourcing\Contracts\BaseEventInterface;
 use LaravelCode\EventSourcing\Contracts\EventInterface;
 use LaravelCode\EventSourcing\Exceptions\ModelNotFoundException;
 use LaravelCode\EventSourcing\Models\Command;
@@ -32,10 +34,8 @@ trait ApplyListener
     {
         try {
             $this->loadEntity($event);
-
             $closure = $this->extractApplyFunction(get_class($event));
             call_user_func([$this, $closure], $event);
-
             if ($this->isDeleted) {
                 $this->storeEvent($event);
 
@@ -50,8 +50,12 @@ trait ApplyListener
         }
     }
 
-    private function storeEvent($event)
+    private function storeEvent(ApplyEventInterface $event)
     {
+        if (! $event->isStoreEvent()) {
+            return false;
+        }
+
         (new Event([
             'id' => $event->getEventId(),
             'command_id' => $event->getCommandId(),
@@ -65,25 +69,44 @@ trait ApplyListener
         ]))->save();
     }
 
-    private function loadEntity(EventInterface $event)
+    private function loadEntity($event)
     {
-        if ($event->getId()) {
-            /** @var Model $model */
-            $modelClass = $this->getModel();
-            $modelInstance = (new $modelClass);
-            $this->entity = $modelInstance->find($event->getId());
-            if (! $this->entity) {
-                throw new ModelNotFoundException();
-            }
-            $this->entity->revision_number = $this->entity->revision_number + 1;
-            $this->validateRevisionNumber();
-
-            return;
-        }
         $modelClass = $this->getModel();
         $this->entity = (new $modelClass);
         $this->entity->revision_number = 1;
-        $this->revisionNumber = 1;
+
+        if ($event->getId()) {
+            if ($event instanceof EventInterface) {
+                $this->entity = $this->entity->findOrFail($event->getId());
+                $this->entity->revision_number = $this->entity->revision_number + 1;
+                $this->validateRevisionNumber();
+
+                return;
+            }
+
+            if ($event instanceof ApplyEventInterface) {
+                if ($event->isStoreEvent()) {
+                    if ($event->getId()) {
+                        $entity = $this->entity->findOrFail($event->getId());
+                        $this->entity = $entity;
+
+                        if ($event->isStoreEvent()) {
+                            $this->entity->revision_number = $this->entity->revision_number + 1;
+                            $this->validateRevisionNumber();
+
+                            return;
+                        }
+                    }
+
+                    return;
+                }
+
+                $entity = $this->entity->findOrNew($event->getId());
+                $this->entity = $entity;
+                $this->entity->id = $event->getId();
+                $this->entity->revision_number = $event->getRevisionNumber();
+            }
+        }
     }
 
     private function validateRevisionNumber()
@@ -91,10 +114,10 @@ trait ApplyListener
         if ($this->entity->id === null) {
             return;
         }
-
         $revisionNumber = Event::where('model', $this->getModel())
             ->where('resource_id', $this->entity->id)
             ->max('revision_number');
+
         $this->revisionNumber = $revisionNumber + 1;
         if ($this->revisionNumber !== $this->entity->revision_number) {
             throw new \Exception('Incorrect revision_number');
@@ -152,7 +175,6 @@ trait ApplyListener
         try {
             $commandClass = $this->getEventName(get_called_class());
             $class = $this->getClassName(get_class($event));
-
             if ($class !== $commandClass) {
                 return false;
             }
@@ -188,7 +210,7 @@ trait ApplyListener
         $command->save();
     }
 
-    public function event(EventInterface $event)
+    public function event(ApplyEventInterface $event)
     {
         $event->setCommandId($this->command->getCommandId());
         $event->setAuthorId($this->command->getAuthorId());

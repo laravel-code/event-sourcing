@@ -36,6 +36,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Event extends Model
 {
+    protected $casts = ['id' => 'string'];
+
     protected $fillable = [
         'id',
         'model',
