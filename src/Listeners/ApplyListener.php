@@ -74,6 +74,7 @@ trait ApplyListener
         $modelClass = $this->getModel();
         $this->entity = (new $modelClass);
         $this->entity->revision_number = 1;
+        $this->revisionNumber = 1;
 
         if ($event->getId()) {
             if ($event instanceof EventInterface) {

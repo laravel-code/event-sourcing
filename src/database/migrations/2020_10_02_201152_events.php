@@ -42,6 +42,7 @@ class Events extends Migration
             $table->string('author_id')->nullable();
             $table->string('key');
             $table->timestamps();
+            $table->index(['model', 'resource_id']);
         });
     }
 
