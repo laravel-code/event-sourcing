@@ -143,22 +143,6 @@ trait SearchBehaviourTrait
     }
 
     /**
-     * Load and send resource.
-     *
-     * @param Builder $query
-     * @param int|string $modelId
-     * @param Request $request
-     * @param $withQuery
-     */
-    public function scopeViewResource(Builder $query, $modelId, Request $request, $withQuery = null)
-    {
-        $resource = $this->scopeResource($query, $modelId, $request, $withQuery)->firstOrFail();
-        \Response::json($resource)
-            ->setStatusCode(200)
-            ->send();
-    }
-
-    /**
      * Load the resource.
      *
      * @param Builder $query

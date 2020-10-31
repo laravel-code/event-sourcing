@@ -20,6 +20,7 @@ class EventReplay extends Command
      {--model= : Replay commands from Model}
      {--resource-id= : Replay commands from Model with an ID}
      {--command-id= : Replay a commandId}
+     {--status= : handled | failed | received}
     ';
 
     /**
@@ -62,6 +63,12 @@ class EventReplay extends Command
 
                 if ($this->option('command-id')) {
                     $query->where('command_id', $this->option('command-id'));
+                }
+
+                if ($this->option('status')) {
+                    $query->where('status', $this->option('status'));
+                } else {
+                    $query->where('status', $this->option('handled'));
                 }
             })
             ->chunk(200, function ($events) {

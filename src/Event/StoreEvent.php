@@ -84,8 +84,6 @@ trait StoreEvent
         $command->save();
         event($class);
 
-        return response()
-            ->json(['command_id' => $commandId])
-            ->send();
+        return ['command_id' => $commandId];
     }
 }
