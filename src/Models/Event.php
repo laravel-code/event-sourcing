@@ -2,6 +2,7 @@
 
 namespace LaravelCode\EventSourcing\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -18,6 +19,9 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $key
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|Event paginatedResources(\Illuminate\Http\Request $request, $withQuery)
+ * @method static \Illuminate\Database\Eloquent\Builder|Event resource($modelId, \Illuminate\Http\Request $request, $withQuery = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|Event viewResource($modelId, \Illuminate\Http\Request $request, $withQuery = null)
  * @method static \Illuminate\Database\Eloquent\Builder|Event newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Event newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Event query()
@@ -36,7 +40,12 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Event extends Model
 {
-    protected $casts = ['id' => 'string'];
+    use SearchBehaviourTrait;
+
+    protected $casts = [
+        'id' => 'string',
+        'command_id' => 'string',
+    ];
 
     protected $fillable = [
         'id',
@@ -49,4 +58,45 @@ class Event extends Model
         'class',
         'author_id',
     ];
+
+    protected $includes = [
+        'command',
+        'command.error',
+    ];
+
+    protected $orderFields = [
+        'revision_number',
+        'model',
+        'created_at',
+        'updated_at',
+    ];
+
+    protected function search()
+    {
+        return [
+            'id',
+            'resource_id',
+            'model' => function (Builder $query, $value) {
+                if (class_exists($value)) {
+                    return $query->where('model', $value);
+                }
+
+                return $query->where('model', 'App\\Models\\'.$value);
+            },
+            'class' => function (Builder $query, $value) {
+                if (class_exists($value)) {
+                    return $query->where('class', $value);
+                }
+
+                return $query->where('class', 'App\\Events\\Apply\\'.$value);
+            },
+            'command_id',
+            'author_id',
+        ];
+    }
+
+    public function command()
+    {
+        return $this->belongsTo(Command::class);
+    }
 }

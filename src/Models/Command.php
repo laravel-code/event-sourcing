@@ -15,6 +15,9 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $key
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|Command paginatedResources(\Illuminate\Http\Request $request, $withQuery)
+ * @method static \Illuminate\Database\Eloquent\Builder|Command resource($modelId, \Illuminate\Http\Request $request, $withQuery = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|Command viewResource($modelId, \Illuminate\Http\Request $request, $withQuery = null)
  * @method static \Illuminate\Database\Eloquent\Builder|Command newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Command newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Command query()
@@ -30,9 +33,20 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Command extends Model
 {
+    use SearchBehaviourTrait;
+
     const STATUS_RECEIVED = 'received';
     const STATUS_HANDLED = 'handled';
     const STATUS_FAILED = 'failed';
+
+    protected $casts = [
+        'id' => 'string',
+    ];
+
+    protected $includes = [
+        'error',
+        'events',
+    ];
 
     /**
      * @var string[]
@@ -45,4 +59,14 @@ class Command extends Model
         'author_id',
         'key',
     ];
+
+    public function error()
+    {
+        return $this->hasOne(CommandError::class);
+    }
+
+    public function events()
+    {
+        return $this->hasMany(Event::class);
+    }
 }

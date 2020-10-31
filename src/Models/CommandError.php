@@ -13,6 +13,9 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $message
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|CommandError paginatedResources(\Illuminate\Http\Request $request, $withQuery)
+ * @method static \Illuminate\Database\Eloquent\Builder|CommandError resource($modelId, \Illuminate\Http\Request $request, $withQuery = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|CommandError viewResource($modelId, \Illuminate\Http\Request $request, $withQuery = null)
  * @method static \Illuminate\Database\Eloquent\Builder|CommandError newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|CommandError newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|CommandError query()
@@ -26,6 +29,13 @@ use Illuminate\Database\Eloquent\Model;
  */
 class CommandError extends Model
 {
+    use SearchBehaviourTrait;
+
+    protected $casts = [
+        'id' => 'string',
+        'command_id' => 'string',
+    ];
+
     /**
      * @var string[]
      */
@@ -35,4 +45,9 @@ class CommandError extends Model
         'class',
         'message',
     ];
+
+    public function command()
+    {
+        return $this->belongsTo(Command::class);
+    }
 }
