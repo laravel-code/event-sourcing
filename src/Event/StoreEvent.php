@@ -59,7 +59,7 @@ trait StoreEvent
         $this->commandId = $id;
     }
 
-    abstract public static function fromPayload(Collection $collection);
+    abstract public static function fromPayload($id, Collection $collection);
 
     abstract public function toPayload(): array;
 
