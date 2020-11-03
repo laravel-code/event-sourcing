@@ -126,7 +126,7 @@ trait ApplyListener
 
         $this->revisionNumber = $revisionNumber + 1;
         if ($this->revisionNumber !== $this->entity->revision_number) {
-            throw new \Exception('Incorrect revision_number');
+            throw new \Exception(sprintf('Incorrect revision_number expected %s but got %s', $this->revisionNumber, $this->entity->revision_number));
         }
     }
 
