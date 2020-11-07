@@ -35,7 +35,7 @@ trait ApplyListener
         try {
             $this->loadEntity($event);
             $closure = $this->extractApplyFunction(get_class($event));
-            call_user_func([$this, $closure], $event);
+            $afterSaveCallback = call_user_func([$this, $closure], $event);
             if ($this->isDeleted) {
                 $this->storeEvent($event);
 
@@ -43,6 +43,10 @@ trait ApplyListener
             }
 
             if ($this->entity->save()) {
+                if (is_callable($afterSaveCallback)) {
+                    call_user_func($afterSaveCallback, $event);
+                }
+
                 $this->storeEvent($event);
             }
         } catch (\Exception $exception) {

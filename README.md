@@ -321,8 +321,18 @@ class PostCreateListener extends BasePostListener implements ShouldQueue
     public function applyPostWasCreated(PostWasCreated $event)
     {
         $this->entity->name = $event->getName();
-        $this->entity->body = $event->getName();
+        $this->entity->body = $event->getBody();
         $this->entity->published = false;
+
+        /**
+        * Execute code after the save has happend
+        * This is useful in situations where the entity id is not yet set
+        * and want to save relations.
+        */
+        return function(PostWasCreated $event) {
+            $this->entity->images()->save(new Image('....'));
+        }
+
     }
 }
 
