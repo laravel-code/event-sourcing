@@ -51,7 +51,7 @@ class EventReplay extends Command
             $this->error('resource-id must be used in conjunction with --model');
         }
 
-        Event::orderBy('created_at')
+        Event::orderBy('position')
             ->where(function (Builder $query) {
                 if ($this->option('model')) {
                     $query->where('model', $this->option('model'));
