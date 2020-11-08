@@ -51,7 +51,7 @@ class Command extends Model
     /**
      * @var string[]
      */
-    protected array $fillable = [
+    protected $fillable = [
         'id',
         'class',
         'payload',
