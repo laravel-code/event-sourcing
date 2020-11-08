@@ -30,9 +30,12 @@ trait ApplyListener
 
     private string $_model;
 
+    private $eventObject;
+
     public function __invoke(ApplyEventInterface $event)
     {
         try {
+            $this->eventObject = $event;
             $this->loadEntity($event);
             $closure = $this->extractApplyFunction(get_class($event));
             $afterSaveCallback = call_user_func([$this, $closure], $event);
@@ -43,7 +46,7 @@ trait ApplyListener
             }
 
             if ($this->entity->save()) {
-                if (is_callable($afterSaveCallback)) {
+                if ($event->isStoreEvent() && is_callable($afterSaveCallback)) {
                     call_user_func($afterSaveCallback, $event);
                 }
 
@@ -56,7 +59,7 @@ trait ApplyListener
 
     private function storeEvent(ApplyEventInterface $event)
     {
-        if (! $event->isStoreEvent()) {
+        if (!$event->isStoreEvent()) {
             return false;
         }
 
@@ -111,10 +114,12 @@ trait ApplyListener
                 $this->entity = $entity;
                 $this->entity->id = $event->getId();
                 $this->entity->revision_number = $event->getRevisionNumber();
-                if (empty($this->entity->created_at)) {
-                    $this->entity->created_at = $event->getCreatedAt();
+                if ($this->entity->timestamps === true) {
+                    if (empty($this->entity->created_at)) {
+                        $this->entity->created_at = $event->getCreatedAt();
+                    }
+                    $this->entity->updated_at = $event->getUpdatedAt();
                 }
-                $this->entity->updated_at = $event->getUpdatedAt();
             }
         }
     }
@@ -150,7 +155,7 @@ trait ApplyListener
             if ($matches) {
                 $events->listen(
                     $method->getParameters()[0]->getType()->getName(), // TODO this will most likely break
-                    [get_called_class(), '__'.$method->name]
+                    [get_called_class(), '__' . $method->name]
                 );
             }
 
@@ -171,10 +176,10 @@ trait ApplyListener
     private function extractApplyFunction(string $class)
     {
         $list = explode('\\', $class);
-        $closure = 'apply'.end($list);
+        $closure = 'apply' . end($list);
 
-        if (! is_callable([get_called_class(), $closure])) {
-            throw new \Exception($closure.' is not set in '.get_called_class());
+        if (!is_callable([get_called_class(), $closure])) {
+            throw new \Exception($closure . ' is not set in ' . get_called_class());
         }
 
         return $closure;
@@ -193,7 +198,7 @@ trait ApplyListener
             $this->handleCommand($event);
             $this->updateCommand($event->getCommandId(), Command::STATUS_HANDLED);
         } catch (\Exception $exception) {
-            $this->logException($event->getCommandId(), $exception->getMessage().$exception->getTraceAsString());
+            $this->logException($event->getCommandId(), $exception->getMessage() . $exception->getTraceAsString());
         }
     }
 
@@ -222,8 +227,15 @@ trait ApplyListener
 
     public function event(ApplyEventInterface $event)
     {
-        $event->setCommandId($this->command->getCommandId());
-        $event->setAuthorId($this->command->getAuthorId());
+        if (isset($this->command)) {
+            $event->setCommandId($this->command->getCommandId());
+            $event->setAuthorId($this->command->getAuthorId());
+            event($event);
+            return;
+        }
+
+        $event->setCommandId($this->eventObject->getCommandId());
+        $event->setAuthorId($this->eventObject->getAuthorId());
         event($event);
     }
 
@@ -249,7 +261,7 @@ trait ApplyListener
             return $this->model;
         }
 
-        if (! empty($this->_model)) {
+        if (!empty($this->_model)) {
             return $this->_model;
         }
 
