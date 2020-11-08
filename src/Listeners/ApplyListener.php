@@ -46,11 +46,11 @@ trait ApplyListener
             }
 
             if ($this->entity->save()) {
+                $this->storeEvent($event);
+
                 if ($event->isStoreEvent() && is_callable($afterSaveCallback)) {
                     call_user_func($afterSaveCallback, $event);
                 }
-
-                $this->storeEvent($event);
             }
         } catch (\Exception $exception) {
             $this->logException($event->getCommandId(), $exception->getMessage());
