@@ -65,11 +65,13 @@ class EventReplay extends Command
                     $query->where('command_id', $this->option('command-id'));
                 }
 
-                if ($this->option('status')) {
-                    $query->where('status', $this->option('status'));
-                } else {
-                    $query->where('status', $this->option('handled'));
-                }
+                $query->whereHas('command', function (Builder $query) {
+                    if ($this->option('status')) {
+                        $query->where('status', $this->option('status'));
+                    } else {
+                        $query->where('status', 'handled');
+                    }
+                });
             })
             ->chunk(200, function ($events) {
                 /** @var Event $event */
@@ -77,7 +79,7 @@ class EventReplay extends Command
                     $this->count++;
                     try {
                         if (class_exists($event->class)) {
-                            $payload = collect(json_decode($event->payload));
+                            $payload = collect(json_decode($event->payload, true));
 
                             /** @var ApplyEventInterface $replayEvent */
                             $replayEvent = call_user_func([$event->class, 'fromPayload'], $event->resource_id, $payload);
