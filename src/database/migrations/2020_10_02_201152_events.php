@@ -41,7 +41,6 @@ class Events extends Migration
             $table->integer('revision_number');
             $table->string('author_id')->nullable();
             $table->string('key');
-            $table->bigIncrements('position');
             $table->timestamps();
             $table->index(['model', 'resource_id']);
         });

@@ -11,6 +11,7 @@ use LaravelCode\EventSourcing\Exceptions\ModelNotFoundException;
 use LaravelCode\EventSourcing\Models\Command;
 use LaravelCode\EventSourcing\Models\CommandError;
 use LaravelCode\EventSourcing\Models\Event;
+use LaravelCode\EventSourcing\PrimaryKey;
 use ReflectionClass;
 use ReflectionMethod;
 use Str;
@@ -30,15 +31,12 @@ trait ApplyListener
 
     private string $_model;
 
-    private $eventObject;
-
     public function __invoke(ApplyEventInterface $event)
     {
         try {
-            $this->eventObject = $event;
             $this->loadEntity($event);
             $closure = $this->extractApplyFunction(get_class($event));
-            $afterSaveCallback = call_user_func([$this, $closure], $event);
+            call_user_func([$this, $closure], $event);
             if ($this->isDeleted) {
                 $this->storeEvent($event);
 
@@ -47,10 +45,6 @@ trait ApplyListener
 
             if ($this->entity->save()) {
                 $this->storeEvent($event);
-
-                if ($event->isStoreEvent() && is_callable($afterSaveCallback)) {
-                    call_user_func($afterSaveCallback, $event);
-                }
             }
         } catch (\Exception $exception) {
             $this->logException($event->getCommandId(), $exception->getMessage());
@@ -59,7 +53,7 @@ trait ApplyListener
 
     private function storeEvent(ApplyEventInterface $event)
     {
-        if (!$event->isStoreEvent()) {
+        if (! $event->isStoreEvent()) {
             return false;
         }
 
@@ -82,6 +76,20 @@ trait ApplyListener
         $this->entity = (new $modelClass);
         $this->entity->revision_number = 1;
         $this->revisionNumber = 1;
+
+        if ($event->getId() === PrimaryKey::UUID) {
+            $this->entity->id = \Str::uuid();
+
+            return;
+        }
+
+        if ($event->getId() === PrimaryKey::AUTO_INCREMENT) {
+            return;
+        }
+
+        if ($event->getId() === PrimaryKey::CALCULATE) {
+            throw new \Exception('Not implemented');
+        }
 
         if ($event->getId()) {
             if ($event instanceof EventInterface) {
@@ -155,7 +163,7 @@ trait ApplyListener
             if ($matches) {
                 $events->listen(
                     $method->getParameters()[0]->getType()->getName(), // TODO this will most likely break
-                    [get_called_class(), '__' . $method->name]
+                    [get_called_class(), '__'.$method->name]
                 );
             }
 
@@ -176,10 +184,10 @@ trait ApplyListener
     private function extractApplyFunction(string $class)
     {
         $list = explode('\\', $class);
-        $closure = 'apply' . end($list);
+        $closure = 'apply'.end($list);
 
-        if (!is_callable([get_called_class(), $closure])) {
-            throw new \Exception($closure . ' is not set in ' . get_called_class());
+        if (! is_callable([get_called_class(), $closure])) {
+            throw new \Exception($closure.' is not set in '.get_called_class());
         }
 
         return $closure;
@@ -198,7 +206,7 @@ trait ApplyListener
             $this->handleCommand($event);
             $this->updateCommand($event->getCommandId(), Command::STATUS_HANDLED);
         } catch (\Exception $exception) {
-            $this->logException($event->getCommandId(), $exception->getMessage() . $exception->getTraceAsString());
+            $this->logException($event->getCommandId(), $exception->getMessage().$exception->getTraceAsString());
         }
     }
 
@@ -227,15 +235,8 @@ trait ApplyListener
 
     public function event(ApplyEventInterface $event)
     {
-        if (isset($this->command)) {
-            $event->setCommandId($this->command->getCommandId());
-            $event->setAuthorId($this->command->getAuthorId());
-            event($event);
-            return;
-        }
-
-        $event->setCommandId($this->eventObject->getCommandId());
-        $event->setAuthorId($this->eventObject->getAuthorId());
+        $event->setCommandId($this->command->getCommandId());
+        $event->setAuthorId($this->command->getAuthorId());
         event($event);
     }
 
@@ -261,7 +262,7 @@ trait ApplyListener
             return $this->model;
         }
 
-        if (!empty($this->_model)) {
+        if (! empty($this->_model)) {
             return $this->_model;
         }
 
