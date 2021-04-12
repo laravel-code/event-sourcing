@@ -1,6 +1,6 @@
 <?php
 
-namespace LaravelCode\EventSourcing\EventSourcing;
+namespace LaravelCode\EventSourcing\Event;
 
 use Auth;
 use Illuminate\Support\Collection;
