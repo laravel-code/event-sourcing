@@ -31,6 +31,9 @@ trait ApplyListener
 
     private string $_model;
 
+    /**
+     * @throws \Exception
+     */
     public function __invoke(ApplyEventInterface $event)
     {
         try {
@@ -43,11 +46,13 @@ trait ApplyListener
                 return;
             }
 
-            if ($this->entity->save()) {
+            if ($this->entity->push()) {
                 $this->storeEvent($event);
             }
         } catch (\Exception $exception) {
             $this->logException($event->getCommandId(), $exception->getMessage());
+
+            throw $exception;
         }
     }
 
@@ -70,7 +75,7 @@ trait ApplyListener
         ]))->save();
     }
 
-    private function loadEntity($event)
+    private function loadEntity(BaseEventInterface $event)
     {
         $modelClass = $this->getModel();
         $this->entity = (new $modelClass);
@@ -78,7 +83,8 @@ trait ApplyListener
         $this->revisionNumber = 1;
 
         if ($event->getId() === PrimaryKey::UUID) {
-            $this->entity->id = \Str::uuid();
+            $event->setId(\Str::uuid());
+            $this->entity->id = $event->getId();
 
             return;
         }

@@ -23,11 +23,17 @@ abstract class ApplyEvent implements ApplyEventInterface
         $this->eventId = Str::uuid();
     }
 
-    public function getId(): ?string
+    /**
+     * @return mixed|string|null
+     */
+    public function getId()
     {
         return $this->id;
     }
 
+    /**
+     * @param int|string $id
+     */
     public function setId($id): void
     {
         $this->id = $id;
