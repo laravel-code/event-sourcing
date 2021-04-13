@@ -2,12 +2,12 @@
 
 namespace LaravelCode\EventSourcing\Listeners;
 
+use Exception;
 use Illuminate\Database\Eloquent\Model;
-use LaravelCode\AMPQ\ConnectionInterface;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use LaravelCode\EventSourcing\Contracts\ApplyEventInterface;
 use LaravelCode\EventSourcing\Contracts\BaseEventInterface;
 use LaravelCode\EventSourcing\Contracts\EventInterface;
-use LaravelCode\EventSourcing\Exceptions\ModelNotFoundException;
 use LaravelCode\EventSourcing\Models\Command;
 use LaravelCode\EventSourcing\Models\CommandError;
 use LaravelCode\EventSourcing\Models\Event;
@@ -18,6 +18,8 @@ use Str;
 
 /**
  * Trait ApplyListener.
+ *
+ * @property Model $entity
  */
 trait ApplyListener
 {
@@ -32,7 +34,7 @@ trait ApplyListener
     private string $_model;
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function __invoke(ApplyEventInterface $event)
     {
@@ -49,17 +51,17 @@ trait ApplyListener
             if ($this->entity->push()) {
                 $this->storeEvent($event);
             }
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $this->logException($event->getCommandId(), $exception->getMessage());
 
             throw $exception;
         }
     }
 
-    private function storeEvent(ApplyEventInterface $event)
+    private function storeEvent(ApplyEventInterface $event): void
     {
-        if (!$event->isStoreEvent()) {
-            return false;
+        if (! $event->isStoreEvent()) {
+            return;
         }
 
         (new Event([
@@ -76,7 +78,7 @@ trait ApplyListener
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     private function loadEntity(BaseEventInterface $event)
     {
@@ -86,7 +88,7 @@ trait ApplyListener
         $this->revisionNumber = 1;
 
         if ($event->getId() === PrimaryKey::UUID) {
-            $event->setId(\Str::uuid());
+            $event->setId(Str::uuid());
             $this->entity->id = $event->getId();
 
             return;
@@ -97,7 +99,7 @@ trait ApplyListener
         }
 
         if ($event->getId() === PrimaryKey::CALCULATE) {
-            throw new \Exception('Not implemented');
+            throw new Exception('Not implemented');
         }
 
         if ($event->getId()) {
@@ -111,15 +113,17 @@ trait ApplyListener
 
             if ($event instanceof ApplyEventInterface) {
                 if ($event->isStoreEvent()) {
-                    if ($event->getId()) {
-                        $entity = $this->entity->findOrNew($event->getId());
+                    try {
+                        $entity = $this->entity->findOrFail($event->getId());
                         $this->entity = $entity;
-
-                        $this->entity->revision_number = $this->entity->revision_number + 1;
-                        $this->validateRevisionNumber();
-
-                        return;
+                    } catch (ModelNotFoundException $exception) {
+                        $modelClass = $this->getModel();
+                        $this->entity = (new $modelClass);
+                        $this->entity->id = $event->getId();
                     }
+
+                    $this->entity->revision_number = $this->entity->revision_number + 1;
+                    $this->validateRevisionNumber();
 
                     return;
                 }
@@ -154,7 +158,7 @@ trait ApplyListener
 
         $this->revisionNumber = $revisionNumber + 1;
         if ($this->revisionNumber !== $this->entity->revision_number) {
-            throw new \Exception(sprintf('Incorrect revision_number expected %s but got %s', $this->revisionNumber, $this->entity->revision_number));
+            throw new Exception(sprintf('Incorrect revision_number expected %s but got %s', $this->revisionNumber, $this->entity->revision_number));
         }
     }
 
@@ -174,7 +178,7 @@ trait ApplyListener
             if ($matches) {
                 $events->listen(
                     $method->getParameters()[0]->getType()->getName(), // TODO this will most likely break
-                    [get_called_class(), '__' . $method->name]
+                    [get_called_class(), '__'.$method->name]
                 );
             }
 
@@ -190,34 +194,36 @@ trait ApplyListener
     /**
      * @param string $class
      * @return string
-     * @throws \Exception
+     * @throws Exception
      */
     private function extractApplyFunction(string $class)
     {
         $list = explode('\\', $class);
-        $closure = 'apply' . end($list);
+        $closure = 'apply'.end($list);
 
-        if (!is_callable([get_called_class(), $closure])) {
-            throw new \Exception($closure . ' is not set in ' . get_called_class());
+        if (! is_callable([get_called_class(), $closure])) {
+            throw new Exception($closure.' is not set in '.get_called_class());
         }
 
         return $closure;
     }
 
-    public function handle(EventInterface $event)
+    public function handle(EventInterface $event): void
     {
         try {
             $commandClass = $this->getEventName(get_called_class());
             $class = $this->getClassName(get_class($event));
             if ($class !== $commandClass) {
-                return false;
+                return;
             }
             $this->command = $event;
             $this->loadEntity($event);
             $this->handleCommand($event);
+
             $this->updateCommand($event->getCommandId(), Command::STATUS_HANDLED);
-        } catch (\Exception $exception) {
-            $this->logException($event->getCommandId(), $exception->getMessage() . $exception->getTraceAsString());
+        } catch (Exception $exception) {
+            $this->logException($event->getCommandId(), $exception->getMessage().$exception->getTraceAsString());
+            throw $exception;
         }
     }
 
@@ -267,13 +273,16 @@ trait ApplyListener
         return end($list);
     }
 
+    /**
+     * @throws Exception
+     */
     private function getModel()
     {
         if (isset($this->model)) {
             return $this->model;
         }
 
-        if (!empty($this->_model)) {
+        if (! empty($this->_model)) {
             return $this->_model;
         }
 
@@ -290,7 +299,7 @@ trait ApplyListener
             return $this->_model;
         }
 
-        throw new \Exception('Please set the public property $model in the listener');
+        throw new Exception('Please set the public property $model in the listener');
     }
 
     public function delete()
