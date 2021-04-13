@@ -58,7 +58,7 @@ trait ApplyListener
 
     private function storeEvent(ApplyEventInterface $event)
     {
-        if (! $event->isStoreEvent()) {
+        if (!$event->isStoreEvent()) {
             return false;
         }
 
@@ -75,6 +75,9 @@ trait ApplyListener
         ]))->save();
     }
 
+    /**
+     * @throws \Exception
+     */
     private function loadEntity(BaseEventInterface $event)
     {
         $modelClass = $this->getModel();
@@ -99,7 +102,7 @@ trait ApplyListener
 
         if ($event->getId()) {
             if ($event instanceof EventInterface) {
-                $this->entity = $this->entity->findOrFail($event->getId());
+                $this->entity = $this->entity->findOrNew($event->getId());
                 $this->entity->revision_number = $this->entity->revision_number + 1;
                 $this->validateRevisionNumber();
 
@@ -109,21 +112,23 @@ trait ApplyListener
             if ($event instanceof ApplyEventInterface) {
                 if ($event->isStoreEvent()) {
                     if ($event->getId()) {
-                        $entity = $this->entity->findOrFail($event->getId());
+                        $entity = $this->entity->findOrNew($event->getId());
                         $this->entity = $entity;
 
-                        if ($event->isStoreEvent()) {
-                            $this->entity->revision_number = $this->entity->revision_number + 1;
-                            $this->validateRevisionNumber();
+                        $this->entity->revision_number = $this->entity->revision_number + 1;
+                        $this->validateRevisionNumber();
 
-                            return;
-                        }
+                        return;
                     }
 
                     return;
                 }
-
-                /** @var Model $entity */
+                /**
+                 * When we replay events we do not store the events
+                 * We will also not check if the revision_number is valid.
+                 *
+                 * @var Model $entity
+                 */
                 $entity = $this->entity->findOrNew($event->getId());
                 $this->entity = $entity;
                 $this->entity->id = $event->getId();
@@ -169,7 +174,7 @@ trait ApplyListener
             if ($matches) {
                 $events->listen(
                     $method->getParameters()[0]->getType()->getName(), // TODO this will most likely break
-                    [get_called_class(), '__'.$method->name]
+                    [get_called_class(), '__' . $method->name]
                 );
             }
 
@@ -190,10 +195,10 @@ trait ApplyListener
     private function extractApplyFunction(string $class)
     {
         $list = explode('\\', $class);
-        $closure = 'apply'.end($list);
+        $closure = 'apply' . end($list);
 
-        if (! is_callable([get_called_class(), $closure])) {
-            throw new \Exception($closure.' is not set in '.get_called_class());
+        if (!is_callable([get_called_class(), $closure])) {
+            throw new \Exception($closure . ' is not set in ' . get_called_class());
         }
 
         return $closure;
@@ -212,7 +217,7 @@ trait ApplyListener
             $this->handleCommand($event);
             $this->updateCommand($event->getCommandId(), Command::STATUS_HANDLED);
         } catch (\Exception $exception) {
-            $this->logException($event->getCommandId(), $exception->getMessage().$exception->getTraceAsString());
+            $this->logException($event->getCommandId(), $exception->getMessage() . $exception->getTraceAsString());
         }
     }
 
@@ -268,7 +273,7 @@ trait ApplyListener
             return $this->model;
         }
 
-        if (! empty($this->_model)) {
+        if (!empty($this->_model)) {
             return $this->_model;
         }
 
