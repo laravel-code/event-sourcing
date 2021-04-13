@@ -19,5 +19,4 @@ interface ApplyEventInterface extends BaseEventInterface
     public function getUpdatedAt(): string;
 
     public function setUpdatedAt(string $updatedAt): void;
-
 }
