@@ -92,7 +92,7 @@ trait StoreEvent
 
     private static function handleOptionsResponse(array $options, $commandId): array
     {
-        if (! $options['response'] ?? null) {
+        if (! ($options['response'] ?? null)) {
             return [];
         }
 
