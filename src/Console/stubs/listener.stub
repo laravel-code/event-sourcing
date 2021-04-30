@@ -26,7 +26,7 @@ class DummyClass
      */
     public function handleCommand(DummyCommand $event)
     {
-        $this->event(new DummyEvent());
+        $this->event(new DummyEvent($event->getId()));
     }
 
     /**
