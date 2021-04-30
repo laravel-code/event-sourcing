@@ -4,6 +4,7 @@ namespace LaravelCode\EventSourcing\Console;
 
 use Illuminate\Console\GeneratorCommand;
 use Illuminate\Support\Str;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
 class ESListener extends GeneratorCommand
@@ -69,7 +70,7 @@ class ESListener extends GeneratorCommand
 
     private function handleCommand($stub)
     {
-        $command = $this->option('command');
+        $command = $this->argument('command');
 
         if (empty($command)) {
             return $stub;
@@ -96,7 +97,7 @@ class ESListener extends GeneratorCommand
 
     private function handleEvent($stub)
     {
-        $event = $this->option('event');
+        $event = $this->argument('event');
 
         if (empty($event)) {
             return $stub;
@@ -134,12 +135,11 @@ class ESListener extends GeneratorCommand
 
     protected function getArguments()
     {
-        return parent::getArguments() +
-            [
-                ['command', InputOption::VALUE_REQUIRED, 'The command class being listened for'],
+        $args = parent::getArguments();
+        $args[] = ['command', InputArgument::REQUIRED, 'The command class being listened for'];
+        $args[] = ['event', InputArgument::REQUIRED, 'The event class being listened for'];
 
-                ['event', InputOption::VALUE_REQUIRED, 'The event class being listened for'],
-            ];
+        return $args;
     }
 
     /**
