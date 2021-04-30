@@ -11,10 +11,8 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Collection;
 use LaravelCode\EventSourcing\Contracts\EventInterface;
-use LaravelCode\EventSourcing\EventSourcing\StoreEvent;
+use LaravelCode\EventSourcing\Event\StoreEvent;
 use LaravelCode\EventSourcing\Event\DataInitiatorTrait;
-
-/**
 
 class DummyClass implements EventInterface
 {

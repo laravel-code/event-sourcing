@@ -2,12 +2,12 @@
 
 namespace DummyNamespace;
 
+use DummyFullCommand;
 use DummyFullEvent;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use LaravelCode\EventSourcing\Contracts\EventInterface;
 use LaravelCode\EventSourcing\Listeners\ApplyListener;
-use \App\Model\User;
 
 class DummyClass
 {
@@ -21,18 +21,19 @@ class DummyClass
     /**
      * Handle the event.
      *
-     * @param DummyEvent $event
+     * @param DummyCommand $event
      * @return void
      */
-    public function handleCommand(DummyEvent $event)
+    public function handleCommand(DummyCommand $event)
     {
-        // $this->event(new WasCreated(null, $event->getName()));
+        $this->event(new DummyEvent(null, $event->getName()));
     }
 
     /**
-     * @param WasCreated $event
+     * @param DummyEvent $event
      */
-    // public function applyWasCreated(WasCreated $event) {
-    //   $this->entity->name = $event->getName();
-    // }
+    public function applyDummyEvent(DummyEvent $event)
+    {
+       // TODO update $this->entity
+    }
 }

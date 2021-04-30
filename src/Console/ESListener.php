@@ -59,18 +59,61 @@ class ESListener extends GeneratorCommand
      */
     protected function buildClass($name)
     {
-        $event = $this->option('command');
+        $stub = parent::buildClass($name);
+
+        $stub = $this->handleCommand($stub);
+        $stub = $this->handleEvent($stub);
+
+        return $stub;
+    }
+
+    private function handleCommand($stub)
+    {
+        $command = $this->option('command');
+
+        if (empty($command)) {
+            return $stub;
+        }
+
+        if (! Str::startsWith($command, [
+            $this->laravel->getNamespace(),
+            'Illuminate',
+            '\\',
+        ])) {
+            $command = $this->laravel->getNamespace().'Commands\\'.$command;
+        }
+
+        $command = $this->qualifyClass($command);
+
+        $stub = str_replace(
+            'DummyEvent', class_basename($command), $stub
+        );
+
+        return str_replace(
+            'DummyFullEvent', trim($command, '\\'), $stub
+        );
+    }
+
+    private function handleEvent($stub)
+    {
+        $event = $this->option('event');
+
+        if (empty($event)) {
+            return $stub;
+        }
 
         if (! Str::startsWith($event, [
             $this->laravel->getNamespace(),
             'Illuminate',
             '\\',
         ])) {
-            $event = $this->laravel->getNamespace().'Commands\\'.$event;
+            $event = $this->laravel->getNamespace().'Models\\Events\\'.$event;
         }
 
+        $event = $this->qualifyClass($event);
+
         $stub = str_replace(
-            'DummyEvent', class_basename($event), parent::buildClass($name)
+            'DummyEvent', class_basename($event), $stub
         );
 
         return str_replace(
@@ -97,7 +140,9 @@ class ESListener extends GeneratorCommand
     protected function getOptions()
     {
         return [
-            ['command', 'e', InputOption::VALUE_OPTIONAL, 'The command class being listened for'],
+            ['command', 'c', InputOption::VALUE_REQUIRED, 'The command class being listened for'],
+
+            ['event', 'e', InputOption::VALUE_REQUIRED, 'The event class being listened for'],
 
             ['queued', null, InputOption::VALUE_NONE, 'Indicates the event listener should be queued'],
         ];
