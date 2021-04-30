@@ -70,7 +70,7 @@ class ESListener extends GeneratorCommand
 
     private function handleCommand($stub)
     {
-        $command = $this->argument('command');
+        $command = trim($this->argument('commandClass'));
 
         if (empty($command)) {
             return $stub;
@@ -85,19 +85,18 @@ class ESListener extends GeneratorCommand
         }
 
         $command = $this->qualifyClass($command);
-
         $stub = str_replace(
-            'DummyEvent', class_basename($command), $stub
+            'DummyCommand', class_basename($command), $stub
         );
 
         return str_replace(
-            'DummyFullEvent', trim($command, '\\'), $stub
+            'DummyFullCommand', trim($command, '\\'), $stub
         );
     }
 
     private function handleEvent($stub)
     {
-        $event = $this->argument('event');
+        $event = trim($this->argument('event'));
 
         if (empty($event)) {
             return $stub;
@@ -136,7 +135,7 @@ class ESListener extends GeneratorCommand
     protected function getArguments()
     {
         $args = parent::getArguments();
-        $args[] = ['command', InputArgument::REQUIRED, 'The command class being listened for'];
+        $args[] = ['commandClass', InputArgument::REQUIRED, 'The command class being listened for'];
         $args[] = ['event', InputArgument::REQUIRED, 'The event class being listened for'];
 
         return $args;
