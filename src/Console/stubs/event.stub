@@ -16,7 +16,7 @@ class DummyClass extends ApplyEvent implements ApplyEventInterface
      **/
     protected bool $strict = true;
 
-    public function __construct($id, $name)
+    public function __construct($id)
     {
         parent::__construct($id);
         $this->constructData(func_get_args());
