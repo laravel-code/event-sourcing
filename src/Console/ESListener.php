@@ -32,7 +32,7 @@ class ESListener extends GeneratorCommand
     /**
      * Determine if the class already exists.
      *
-     * @param  string  $rawName
+     * @param string $rawName
      * @return bool
      */
     protected function alreadyExists($rawName)
@@ -54,7 +54,7 @@ class ESListener extends GeneratorCommand
     /**
      * Build the class with the given name.
      *
-     * @param  string  $name
+     * @param string $name
      * @return string
      */
     protected function buildClass($name)
@@ -124,12 +124,22 @@ class ESListener extends GeneratorCommand
     /**
      * Get the default namespace for the class.
      *
-     * @param  string  $rootNamespace
+     * @param string $rootNamespace
      * @return string
      */
     protected function getDefaultNamespace($rootNamespace)
     {
         return $rootNamespace.'\Listeners';
+    }
+
+    protected function getArguments()
+    {
+        return parent::getArguments() +
+            [
+                ['command', InputOption::VALUE_REQUIRED, 'The command class being listened for'],
+
+                ['event', InputOption::VALUE_REQUIRED, 'The event class being listened for'],
+            ];
     }
 
     /**
@@ -140,10 +150,6 @@ class ESListener extends GeneratorCommand
     protected function getOptions()
     {
         return [
-            ['command', 'c', InputOption::VALUE_REQUIRED, 'The command class being listened for'],
-
-            ['event', 'e', InputOption::VALUE_REQUIRED, 'The event class being listened for'],
-
             ['queued', null, InputOption::VALUE_NONE, 'Indicates the event listener should be queued'],
         ];
     }
