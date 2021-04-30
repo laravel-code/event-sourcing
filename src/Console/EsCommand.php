@@ -5,28 +5,28 @@ namespace LaravelCode\EventSourcing\Console;
 use Illuminate\Console\GeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
 
-class ESEvent extends GeneratorCommand
+class EsCommand extends GeneratorCommand
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $name = 'make:es:event';
+    protected $name = 'make:es:command';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create a new event for event sourced models';
+    protected $description = 'Create a new command for event sourced models';
 
     /**
      * The type of class being generated.
      *
      * @var string
      */
-    protected $type = 'Event';
+    protected $type = 'Command';
 
     /**
      * Determine if the class already exists.
@@ -47,7 +47,7 @@ class ESEvent extends GeneratorCommand
      */
     protected function getStub()
     {
-        return __DIR__.'/stubs/event.stub';
+        return __DIR__.'/stubs/command.stub';
     }
 
     /**
@@ -58,6 +58,6 @@ class ESEvent extends GeneratorCommand
      */
     protected function getDefaultNamespace($rootNamespace)
     {
-        return $rootNamespace.'\Models\Events';
+        return $rootNamespace.'\Commands';
     }
 }

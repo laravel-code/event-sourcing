@@ -2,51 +2,23 @@
 
 namespace DummyNamespace;
 
-use Illuminate\Broadcasting\Channel;
-use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
-use Illuminate\Foundation\Events\Dispatchable;
-use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Collection;
-use LaravelCode\EventSourcing\Contracts\EventInterface;
-use LaravelCode\EventSourcing\EventSourcing\StoreEvent;
+use LaravelCode\EventSourcing\Contracts\ApplyEventInterface;
+use LaravelCode\EventSourcing\Event\Apply\ApplyEvent;
+use LaravelCode\EventSourcing\Event\DataInitiatorTrait;
 
-class DummyClass implements EventInterface
+class DummyClass extends ApplyEvent implements ApplyEventInterface
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels, StoreEvent;
+    use DataInitiatorTrait;
 
-    private string $name;
+    /**
+     * Make sure that requested properties are set
+     **/
+    protected bool $strict = true;
 
     public function __construct($id, $name)
     {
-        $this->id = $id;
-        $this->name = $name;
-    }
-
-    /**
-     * @return string
-     */
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-
-    public static function fromPayload($id, Collection $collection)
-    {
-        return new self(
-            $id,
-            $collection->get('name')
-        );
-    }
-
-    public function toPayload(): array
-    {
-        return [
-            'id'   => $this->getId(),
-            'name' => $this->getName(),
-        ];
+        parent::__construct($id);
+        $this->constructData(func_get_args());
     }
 }

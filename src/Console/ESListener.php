@@ -59,14 +59,14 @@ class ESListener extends GeneratorCommand
      */
     protected function buildClass($name)
     {
-        $event = $this->option('event');
+        $event = $this->option('command');
 
         if (! Str::startsWith($event, [
             $this->laravel->getNamespace(),
             'Illuminate',
             '\\',
         ])) {
-            $event = $this->laravel->getNamespace().'Events\\'.$event;
+            $event = $this->laravel->getNamespace().'Commands\\'.$event;
         }
 
         $stub = str_replace(
@@ -97,7 +97,7 @@ class ESListener extends GeneratorCommand
     protected function getOptions()
     {
         return [
-            ['event', 'e', InputOption::VALUE_OPTIONAL, 'The event class being listened for'],
+            ['command', 'e', InputOption::VALUE_OPTIONAL, 'The command class being listened for'],
 
             ['queued', null, InputOption::VALUE_NONE, 'Indicates the event listener should be queued'],
         ];
